@@ -3,6 +3,7 @@ import io
 import pickle
 import time
 import bz2
+import lzma
 import numpy as np
 
 class TextLoader():
@@ -72,7 +73,7 @@ class TextLoader():
         return False
 
     def _get_input_file_list(self, data_dir):
-        suffixes = ['.txt', '.bz2']
+        suffixes = ['.txt', '.bz2', 'xz']
         input_file_list = []
         if os.path.isdir(data_dir):
             for walk_root, walk_dir, walk_files in os.walk(data_dir):
@@ -104,6 +105,7 @@ class TextLoader():
     def _preprocess(self, input_file, tensor_file):
         if input_file.endswith(".bz2"): file_reference = bz2.open(input_file, mode='rt')
         elif input_file.endswith(".txt"): file_reference = io.open(input_file, mode='rt')
+        elif input_file.endswith(".xz"): file_reference = lzma.open(input_file, mode='rt')
         data = file_reference.read()
         file_reference.close()
         # Convert the entirety of the data file from characters to indices via the vocab dictionary.
