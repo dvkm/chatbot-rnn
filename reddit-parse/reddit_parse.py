@@ -1,4 +1,5 @@
 import bz2
+import lzma
 import argparse
 import os
 import json
@@ -131,16 +132,30 @@ def raw_data_generator(path):
 						except IOError:
 							print("IOError from file {}".format(file_path))
 							continue
+				elif file_path.endswith(".xz"):
+					print("\nReading from {}".format(file_path))
+					with lzma.open(file_path, "rt") as raw_data:
+						try:
+							for line in raw_data: yield line
+						except IOError:
+							print("IOError from file {}".format(file_path))
+							continue
 				else: print("Skipping file {} (doesn't end with {})".format(file_path, FILE_SUFFIX))
 	elif os.path.isfile(path):
 		print("Reading from {}".format(path))
-		with bz2.open(path, "rt") as raw_data:
-			for line in raw_data: yield line
+		if file_path.endswith(".bz2"):
+			with bz2.open(path, "rt") as raw_data:
+				for line in raw_data: yield line
+		elif file_path.endswith(".xz"):
+			with lzma.open(path, "rt") as raw_data:
+				for line in raw_data: yield line
 
 class OutputHandler():
 	def __init__(self, path, output_file_size):
 		if path.endswith(FILE_SUFFIX):
 			path = path[:-len(FILE_SUFFIX)]
+		elif path.endswith(".xz"):
+			path = path[:-len(".xz")]
 		self.base_path = path
 		self.output_file_size = output_file_size
 		self.file_reference = None
