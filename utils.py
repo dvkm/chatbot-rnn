@@ -73,7 +73,7 @@ class TextLoader():
         return False
 
     def _get_input_file_list(self, data_dir):
-        suffixes = ['.txt', '.bz2', 'xz']
+        suffixes = ['.txt', '.bz2', '.xz']
         input_file_list = []
         if os.path.isdir(data_dir):
             for walk_root, walk_dir, walk_files in os.walk(data_dir):
