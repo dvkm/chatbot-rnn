@@ -81,7 +81,7 @@ class TextLoader():
                     if file_name.startswith("."): continue
                     file_path = os.path.join(walk_root, file_name)
                     for suffix in suffixes:
-                        if file_path.endswith(suffixes):
+                        if file_path.endswith(suffix):
                             input_file_list.append(file_path)
         else: raise ValueError("Not a directory: {}".format(data_dir))
         return sorted(input_file_list)
