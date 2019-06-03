@@ -61,7 +61,7 @@ class RedditComment(object):
 
 def parse_main(args):
 	if not os.path.isfile(args.config_file):
-		print("File not found: {}".format(args.input_file))
+		print("File not found: {}".format(args.config_file))
 		return
 	with open(args.config_file, 'r') as f:
 		config = json.load(f)
