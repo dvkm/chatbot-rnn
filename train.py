@@ -92,7 +92,13 @@ def train(args):
 
     config = tf.ConfigProto(log_device_placement=False)
     #config.gpu_options.allow_growth = True
-    with tf.Session(config=config) as sess:
+    if 'COLAB_TPU_ADDR' not in os.environ:
+      print('ERROR: Not connected to a TPU runtime; please see the first cell in this notebook for instructions!')
+    else:
+      tpu_address = 'grpc://' + os.environ['COLAB_TPU_ADDR']
+      print ('TPU address is', tpu_address)
+    
+    with tf.Session(tpu_address, config=config) as sess:
         tf.global_variables_initializer().run()
         saver = tf.train.Saver(model.save_variables_list(), max_to_keep=3)
         if (load_model):
