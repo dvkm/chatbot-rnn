@@ -21,7 +21,7 @@ def main():
                        help='directory for checkpointed models (load from here if one is already present)')
     parser.add_argument('--block_size', type=int, default=2048,
                        help='number of cells per block')
-    parser.add_argument('--num_blocks', type=int, default=3,
+    parser.add_argument('--num_blocks', type=int, default=4,
                        help='number of blocks per layer')
     parser.add_argument('--num_layers', type=int, default=3,
                        help='number of layers')
