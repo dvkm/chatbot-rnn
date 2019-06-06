@@ -23,7 +23,7 @@ def main():
 					   help='json parameters for parsing')
 	parser.add_argument('--comment_cache_size', type=int, default=1e7,
 					   help='max number of comments to cache in memory before flushing')
-	parser.add_argument('--output_file_size', type=int, default=2e1,
+	parser.add_argument('--output_file_size', type=int, default=2e8,
 					   help='max size of each output file (give or take one conversation)')
 	parser.add_argument('--print_every', type=int, default=1000,
 					   help='print an update to the screen this often')
