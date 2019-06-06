@@ -177,7 +177,7 @@ class OutputHandler():
 			i += 1
 		self.current_path = path
 		self.current_file_size = 0
-		self.file_reference = bz2.open(self.current_path, mode="wt")
+		self.file_reference = open(self.current_path, mode="w")
 
 def post_qualifies(json_object, subreddit_blacklist,
 		subreddit_whitelist, substring_blacklist):
