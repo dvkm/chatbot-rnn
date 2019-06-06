@@ -34,6 +34,11 @@ def main():
 					   help='set to true to print the name of the subreddit before each conversation'
 					   + ' to facilitate more convenient blacklisting in the config json file.'
 					   + ' (Remember to disable before constructing training data.)')
+	parser.add_argument('--debug', type=str2bool, nargs='?',
+                       const=False, default=False,
+					   help='set to true to print the name of the subreddit before each conversation'
+					   + ' to facilitate more convenient blacklisting in the config json file.'
+					   + ' (Remember to disable before constructing training data.)')
 	args = parser.parse_args()
 	parse_main(args)
 
@@ -89,7 +94,7 @@ def parse_main(args):
 		total_read += i
 		process_comment_cache(comment_dict, args.print_every)
 		write_comment_cache(comment_dict, output_handler, args.print_every,
-							args.print_subreddit, args.min_conversation_length)
+							args.print_subreddit, args.min_conversation_length, args.debug)
 		write_report(os.path.join(args.logdir, REPORT_FILE), subreddit_dict)
 		comment_dict.clear()
 	print("\nRead all {:,d} lines from {}.".format(total_read, args.input_file))
@@ -238,7 +243,7 @@ def process_comment_cache(comment_dict, print_every):
 	print()
 
 def write_comment_cache(comment_dict, output_file, print_every,
-			record_subreddit=False, min_conversation_length=5):
+			record_subreddit=False, min_conversation_length=5, debug=False):
 	i = 0
 	prev_print_count = 0
 	for k, v in comment_dict.items():
@@ -255,6 +260,8 @@ def write_comment_cache(comment_dict, output_file, print_every,
 				else:
 					comment = None
 					if depth >= min_conversation_length:
+						if debug == True:
+							print(output_string)
 						output_file.write(output_string + '\n')
 						i += depth
 						if i > prev_print_count + print_every:
