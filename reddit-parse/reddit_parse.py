@@ -182,7 +182,7 @@ class OutputHandler():
 			i += 1
 		self.current_path = path
 		self.current_file_size = 0
-		self.file_reference = open(self.current_path, mode="w")
+		self.file_reference = open(self.current_path, "w")
 
 def post_qualifies(json_object, subreddit_blacklist,
 		subreddit_whitelist, substring_blacklist):
@@ -243,7 +243,7 @@ def process_comment_cache(comment_dict, print_every):
 	print()
 
 def write_comment_cache(comment_dict, output_file, print_every,
-			record_subreddit=False, min_conversation_length=5, debug=False):
+			record_subreddit=False, min_conversation_length=5, debug=True):
 	i = 0
 	prev_print_count = 0
 	for k, v in comment_dict.items():
