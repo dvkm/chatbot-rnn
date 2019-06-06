@@ -85,10 +85,6 @@ def train(args):
     # Create the model!
     print("Building the model")
     model = Model(args)
-    tpu_model = tf.contrib.tpu.keras_to_tpu_model(
-    model,
-    strategy=tf.contrib.tpu.TPUDistributionStrategy(
-        tf.contrib.cluster_resolver.TPUClusterResolver(TPU_ADDRESS)))
     print("Total trainable parameters: {:,d}".format(model.trainable_parameter_count()))
     
     # Make tensorflow less verbose; filter out info (1+) and warnings (2+) but not errors (3).
@@ -102,6 +98,10 @@ def train(args):
       tpu_address = 'grpc://' + os.environ['COLAB_TPU_ADDR']
       print ('TPU address is', tpu_address)
     
+    tpu_model = tf.contrib.tpu.keras_to_tpu_model(
+    model,
+    strategy=tf.contrib.tpu.TPUDistributionStrategy(
+        tf.contrib.cluster_resolver.TPUClusterResolver(TPU_ADDRESS)))
     with tf.Session(tpu_address, config=config) as sess:
         tf.global_variables_initializer().run()
         saver = tf.train.Saver(tpu_model.save_variables_list(), max_to_keep=3)
