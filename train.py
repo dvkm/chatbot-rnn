@@ -92,6 +92,7 @@ def train(args):
 
     config = tf.ConfigProto(log_device_placement=False)
     #config.gpu_options.allow_growth = True
+    tpu_address = ""
     if 'COLAB_TPU_ADDR' not in os.environ:
       print('ERROR: Not connected to a TPU runtime; please see the first cell in this notebook for instructions!')
     else:
@@ -101,7 +102,7 @@ def train(args):
     tpu_model = tf.contrib.tpu.keras_to_tpu_model(
     model,
     strategy=tf.contrib.tpu.TPUDistributionStrategy(
-        tf.contrib.cluster_resolver.TPUClusterResolver(TPU_ADDRESS)))
+        tf.contrib.cluster_resolver.TPUClusterResolver(tpu_address)))
     with tf.Session(tpu_address, config=config) as sess:
         tf.global_variables_initializer().run()
         saver = tf.train.Saver(tpu_model.save_variables_list(), max_to_keep=3)
