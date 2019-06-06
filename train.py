@@ -85,6 +85,7 @@ def train(args):
     # Create the model!
     print("Building the model")
     model = Model(args)
+    mode.summary()
     print("Total trainable parameters: {:,d}".format(model.trainable_parameter_count()))
     
     # Make tensorflow less verbose; filter out info (1+) and warnings (2+) but not errors (3).
