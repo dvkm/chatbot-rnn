@@ -6,7 +6,7 @@ import json
 import re
 import sys
 
-FILE_SUFFIX = ".txt"
+FILE_SUFFIX = ".bz2"
 OUTPUT_FILE = "output.bz2"
 REPORT_FILE = "RC_report"
 
@@ -23,18 +23,13 @@ def main():
 					   help='json parameters for parsing')
 	parser.add_argument('--comment_cache_size', type=int, default=1e7,
 					   help='max number of comments to cache in memory before flushing')
-	parser.add_argument('--output_file_size', type=int, default=2e8,
+	parser.add_argument('--output_file_size', type=int, default=2e1,
 					   help='max size of each output file (give or take one conversation)')
 	parser.add_argument('--print_every', type=int, default=1000,
 					   help='print an update to the screen this often')
 	parser.add_argument('--min_conversation_length', type=int, default=5,
 					   help='conversations must have at least this many comments for inclusion')
 	parser.add_argument('--print_subreddit', type=str2bool, nargs='?',
-                       const=False, default=False,
-					   help='set to true to print the name of the subreddit before each conversation'
-					   + ' to facilitate more convenient blacklisting in the config json file.'
-					   + ' (Remember to disable before constructing training data.)')
-	parser.add_argument('--debug', type=str2bool, nargs='?',
                        const=False, default=False,
 					   help='set to true to print the name of the subreddit before each conversation'
 					   + ' to facilitate more convenient blacklisting in the config json file.'
@@ -94,7 +89,7 @@ def parse_main(args):
 		total_read += i
 		process_comment_cache(comment_dict, args.print_every)
 		write_comment_cache(comment_dict, output_handler, args.print_every,
-							args.print_subreddit, args.min_conversation_length, args.debug)
+							args.print_subreddit, args.min_conversation_length)
 		write_report(os.path.join(args.logdir, REPORT_FILE), subreddit_dict)
 		comment_dict.clear()
 	print("\nRead all {:,d} lines from {}.".format(total_read, args.input_file))
@@ -182,7 +177,7 @@ class OutputHandler():
 			i += 1
 		self.current_path = path
 		self.current_file_size = 0
-		self.file_reference = open(self.current_path, "w")
+		self.file_reference = bz2.open(self.current_path, mode="wt")
 
 def post_qualifies(json_object, subreddit_blacklist,
 		subreddit_whitelist, substring_blacklist):
@@ -243,7 +238,7 @@ def process_comment_cache(comment_dict, print_every):
 	print()
 
 def write_comment_cache(comment_dict, output_file, print_every,
-			record_subreddit=False, min_conversation_length=5, debug=True):
+			record_subreddit=False, min_conversation_length=5):
 	i = 0
 	prev_print_count = 0
 	for k, v in comment_dict.items():
@@ -260,8 +255,6 @@ def write_comment_cache(comment_dict, output_file, print_every,
 				else:
 					comment = None
 					if depth >= min_conversation_length:
-						if debug == True:
-							print(output_string)
 						output_file.write(output_string + '\n')
 						i += depth
 						if i > prev_print_count + print_every:
