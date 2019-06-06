@@ -25,7 +25,7 @@ def main():
 					   help='max number of comments to cache in memory before flushing')
 	parser.add_argument('--output_file_size', type=int, default=2e8,
 					   help='max size of each output file (give or take one conversation)')
-	parser.add_argument('--print_every', type=int, default=100000,
+	parser.add_argument('--print_every', type=int, default=1000,
 					   help='print an update to the screen this often')
 	parser.add_argument('--min_conversation_length', type=int, default=5,
 					   help='conversations must have at least this many comments for inclusion')
