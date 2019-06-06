@@ -6,7 +6,7 @@ import json
 import re
 import sys
 
-FILE_SUFFIX = ".bz2"
+FILE_SUFFIX = ".txt"
 OUTPUT_FILE = "output.bz2"
 REPORT_FILE = "RC_report"
 
