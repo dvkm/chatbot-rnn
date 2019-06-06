@@ -85,6 +85,10 @@ def train(args):
     # Create the model!
     print("Building the model")
     model = Model(args)
+    tpu_model = tf.contrib.tpu.keras_to_tpu_model(
+    model,
+    strategy=tf.contrib.tpu.TPUDistributionStrategy(
+        tf.contrib.cluster_resolver.TPUClusterResolver(TPU_ADDRESS)))
     print("Total trainable parameters: {:,d}".format(model.trainable_parameter_count()))
     
     # Make tensorflow less verbose; filter out info (1+) and warnings (2+) but not errors (3).
@@ -100,19 +104,19 @@ def train(args):
     
     with tf.Session(tpu_address, config=config) as sess:
         tf.global_variables_initializer().run()
-        saver = tf.train.Saver(model.save_variables_list(), max_to_keep=3)
+        saver = tf.train.Saver(tpu_model.save_variables_list(), max_to_keep=3)
         if (load_model):
             print("Loading saved parameters")
             saver.restore(sess, ckpt.model_checkpoint_path)
-        global_epoch_fraction = sess.run(model.global_epoch_fraction)
-        global_seconds_elapsed = sess.run(model.global_seconds_elapsed)
+        global_epoch_fraction = sess.run(tpu_model.global_epoch_fraction)
+        global_seconds_elapsed = sess.run(tpu_model.global_seconds_elapsed)
         if load_model: print("Resuming from global epoch fraction {:.3f},"
                 " total trained time: {}, learning rate: {}".format(
                 global_epoch_fraction,
                 datetime.timedelta(seconds=float(global_seconds_elapsed)),
-                sess.run(model.lr)))
+                sess.run(tpu_model.lr)))
         if (args.set_learning_rate > 0):
-            sess.run(tf.assign(model.lr, args.set_learning_rate))
+            sess.run(tf.assign(tpu_model.lr, args.set_learning_rate))
             print("Reset learning rate to {}".format(args.set_learning_rate))
         data_loader.cue_batch_pointer_to_epoch_fraction(global_epoch_fraction)
         initial_batch_step = int((global_epoch_fraction
@@ -120,7 +124,7 @@ def train(args):
         epoch_range = (int(global_epoch_fraction),
                 args.num_epochs + int(global_epoch_fraction))
         writer = tf.summary.FileWriter(args.save_dir, graph=tf.get_default_graph())
-        outputs = [model.cost, model.final_state, model.train_op, model.summary_op]
+        outputs = [tpu_model.cost, tpu_model.final_state, tpu_model.train_op, tpu_model.summary_op]
         global_step = epoch_range[0] * data_loader.total_batch_count + initial_batch_step
         avg_loss = 0
         avg_steps = 0
@@ -128,7 +132,7 @@ def train(args):
             for e in range(*epoch_range):
                 # e iterates through the training epochs.
                 # Reset the model state, so it does not carry over from the end of the previous epoch.
-                state = sess.run(model.zero_state)
+                state = sess.run(tpu_model.zero_state)
                 batch_range = (initial_batch_step, data_loader.total_batch_count)
                 initial_batch_step = 0
                 for b in range(*batch_range):
@@ -136,9 +140,9 @@ def train(args):
                     if global_step % args.decay_steps == 0:
                         # Set the model.lr element of the model to track
                         # the appropriately decayed learning rate.
-                        current_learning_rate = sess.run(model.lr)
+                        current_learning_rate = sess.run(tpu_model.lr)
                         current_learning_rate *= args.decay_rate
-                        sess.run(tf.assign(model.lr, current_learning_rate))
+                        sess.run(tf.assign(tpu_model.lr, current_learning_rate))
                         print("Decayed learning rate to {}".format(current_learning_rate))
                     start = time.time()
                     # Pull the next batch inputs (x) and targets (y) from the data loader.
@@ -149,7 +153,7 @@ def train(args):
                     # and initialize the model state to the final state from the previous batch, so that
                     # model state is accumulated and carried over between batches.
                     feed = {model.input_data: x, model.targets: y}
-                    model.add_state_to_feed_dict(feed, state)
+                    tpu_model.add_state_to_feed_dict(feed, state)
                     
                     # Run the session! Specifically, tell TensorFlow to compute the graph to calculate
                     # the values of cost, final state, and the training op.
